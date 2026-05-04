@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>X-RAY Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#0A84FF;--green:#30D158;--red:#FF453A;--bg:#000;--glass:rgba(28,28,30,.85);--glass-border:rgba(255,255,255,.09);--text:#fff;--muted:rgba(255,255,255,.42);--shadow:0 20px 60px rgba(0,0,0,.55);}
+[data-theme="light"]{--bg:#F2F2F7;--glass:rgba(255,255,255,.82);--glass-border:rgba(0,0,0,.07);--text:#000;--muted:rgba(0,0,0,.38);--shadow:0 20px 60px rgba(0,0,0,.10);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);background-image:radial-gradient(ellipse 90% 50% at 50% -5%,rgba(10,132,255,.28),transparent),radial-gradient(ellipse 40% 30% at 85% 85%,rgba(48,209,88,.07),transparent);color:var(--text);font-family:'IBM Plex Sans Arabic',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:14px 14px 90px;transition:background .4s,color .4s;}
+.dynamic-island{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;gap:8px;background:#1c1c1e;border-radius:22px;padding:8px 18px;box-shadow:0 8px 24px rgba(0,0,0,.6);cursor:pointer;text-decoration:none;transition:all .3s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);-webkit-tap-highlight-color:transparent;}
+.dynamic-island:active{transform:translateX(-50%) scale(.96);}
+.di-icon{width:18px;height:18px;flex-shrink:0;fill:#24A1DE;}
+.di-text{font-weight:700;font-size:.82rem;color:#fff;letter-spacing:.5px;white-space:nowrap;}
+.glass{background:var(--glass);backdrop-filter:blur(32px) saturate(200%);-webkit-backdrop-filter:blur(32px) saturate(200%);border:1px solid var(--glass-border);border-radius:22px;box-shadow:var(--shadow);}
+.header{width:min(500px,100%);padding:13px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;margin-top:52px;}
+.logo{font-family:'Space Mono',monospace;font-size:.88rem;font-weight:700;letter-spacing:2px;color:var(--blue);}
+.logo b{color:var(--text);}
+.toggle-row{display:flex;align-items:center;gap:8px;}
+.toggle-lbl{font-size:.62rem;font-weight:700;color:var(--muted);letter-spacing:1px;}
+.ios-sw{width:51px;height:29px;background:#3a3a3c;border-radius:15px;position:relative;cursor:pointer;transition:background .3s;}
+[data-theme="light"] .ios-sw{background:#e5e5ea;}
+.ios-sw::after{content:'';position:absolute;top:3px;left:3px;width:23px;height:23px;background:#fff;border-radius:50%;transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:0 2px 6px rgba(0,0,0,.3);}
+[data-theme="light"] .ios-sw::after{transform:translateX(22px);}
+.screen{width:min(500px,100%);display:none;}
+.screen.active{display:block;}
+.sec-label{font-size:.65rem;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin:20px 0 10px 4px;}
+.lec-card{padding:16px 18px;margin-bottom:9px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .15s;}
+.lec-card:active{transform:scale(.98);}
+.lec-num{width:44px;height:44px;border-radius:11px;background:rgba(10,132,255,.12);border:1px solid rgba(10,132,255,.22);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:.72rem;font-weight:700;color:var(--blue);flex-shrink:0;}
+.lec-body{flex:1;}
+.lec-name{font-size:.93rem;font-weight:700;margin-bottom:3px;}
+.lec-count{font-size:.72rem;color:var(--muted);}
+.lec-arrow{color:var(--muted);font-size:1.2rem;}
+.progress-wrap{margin-bottom:14px;padding:14px 18px;}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.prog-lec{font-size:.72rem;font-weight:700;color:var(--blue);letter-spacing:.5px;}
+.prog-bar{height:4px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--blue);border-radius:4px;transition:width .4s cubic-bezier(.4,0,.2,1);}
+.quiz-card{padding:22px 20px;margin-bottom:10px;}
+.q-num{font-size:.65rem;font-weight:700;color:var(--blue);letter-spacing:2px;margin-bottom:10px;text-align:center;}
+.q-text{font-size:1rem;font-weight:700;line-height:1.7;text-align:center;margin-bottom:14px;}
+/* Translate button */
+.tr-btn{width:100%;padding:10px 14px;background:rgba(10,132,255,.10);border:1px solid rgba(10,132,255,.28);color:var(--blue);border-radius:12px;font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;-webkit-tap-highlight-color:transparent;}
+.tr-btn:active{background:rgba(10,132,255,.22);transform:scale(.98);}
+.tr-btn:disabled{opacity:.55;cursor:not-allowed;transform:none;}
+.tr-box{background:rgba(10,132,255,.07);border:1px solid rgba(10,132,255,.2);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:.93rem;font-weight:600;line-height:1.8;color:var(--text);text-align:right;direction:rtl;display:none;}
+/* Options */
+.opt{padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--glass-border);cursor:pointer;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:all .2s;-webkit-tap-highlight-color:transparent;}
+.opt:active{transform:scale(.98);}
+.opt.correct{background:rgba(48,209,88,.15);border-color:var(--green);}
+.opt.wrong{background:rgba(255,69,58,.15);border-color:var(--red);}
+.opt-badge{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:.7rem;font-weight:700;flex-shrink:0;color:var(--muted);}
+.opt.correct .opt-badge{background:var(--green);color:#fff;}
+.opt.wrong .opt-badge{background:var(--red);color:#fff;}
+.opt-text{font-size:.9rem;font-weight:600;flex:1;}
+.next-btn{width:100%;padding:15px;background:var(--blue);color:#fff;border:none;border-radius:14px;font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;display:none;margin-top:12px;transition:opacity .2s;}
+.next-btn:active{opacity:.8;}
+.back-btn{width:min(500px,100%);padding:12px 18px;background:transparent;color:var(--muted);border:1px solid var(--glass-border);border-radius:14px;font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;}
+/* Result */
+.result-card{padding:28px 20px;text-align:center;}
+.result-emoji{font-size:3rem;margin-bottom:12px;}
+.result-score{font-family:'Space Mono',monospace;font-size:2.5rem;font-weight:700;color:var(--blue);margin-bottom:6px;}
+.result-lbl{font-size:.9rem;color:var(--muted);margin-bottom:16px;}
+.wrong-badge{display:inline-block;background:rgba(255,69,58,.12);color:var(--red);border:1px solid rgba(255,69,58,.3);border-radius:20px;padding:4px 14px;font-size:.78rem;font-weight:700;margin-bottom:20px;}
+.result-btns{display:flex;flex-direction:column;gap:10px;}
+.btn-blue{width:100%;padding:15px;background:var(--blue);color:#fff;border:none;border-radius:14px;font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;transition:opacity .2s;}
+.btn-blue:active{opacity:.8;}
+.btn-red{width:100%;padding:15px;background:rgba(255,69,58,.12);color:var(--red);border:1px solid rgba(255,69,58,.35);border-radius:14px;font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;transition:opacity .2s;}
+.btn-red:active{opacity:.8;}
+/* Review wrong screen */
+.review-lbl{font-size:.65rem;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin:16px 0 10px 4px;}
+.review-item{padding:18px;margin-bottom:12px;}
+.review-err-tag{font-size:.62rem;font-weight:700;color:var(--red);letter-spacing:1.5px;margin-bottom:6px;}
+.review-q{font-size:.95rem;font-weight:700;line-height:1.6;margin-bottom:10px;}
+.review-tr-btn{padding:8px 12px;background:rgba(10,132,255,.10);border:1px solid rgba(10,132,255,.28);color:var(--blue);border-radius:9px;font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;margin-bottom:10px;transition:all .2s;-webkit-tap-highlight-color:transparent;}
+.review-tr-btn:active{background:rgba(10,132,255,.22);}
+.review-tr-btn:disabled{opacity:.5;cursor:not-allowed;}
+.review-tr-box{background:rgba(10,132,255,.07);border:1px solid rgba(10,132,255,.2);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:.88rem;font-weight:600;line-height:1.7;display:none;}
+.review-opts{display:flex;flex-direction:column;gap:6px;}
+.rev-opt{padding:10px 14px;border-radius:11px;font-size:.85rem;font-weight:600;border:1px solid var(--glass-border);display:flex;align-items:center;gap:10px;}
+.rev-opt.ok{background:rgba(48,209,88,.12);border-color:var(--green);color:var(--green);}
+.rev-opt.no{background:rgba(255,69,58,.08);border-color:rgba(255,69,58,.3);color:var(--red);}
+.rev-badge{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:.65rem;font-weight:700;flex-shrink:0;background:rgba(255,255,255,.07);}
+.rev-opt.ok .rev-badge{background:var(--green);color:#fff;}
+.rev-opt.no .rev-badge{background:var(--red);color:#fff;}
+.action-row{width:min(500px,100%);display:flex;flex-direction:column;gap:10px;margin-top:4px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.quiz-card,.lec-card,.review-item{animation:fadeUp .35s ease both;}
+</style>
+</head>
+<body data-theme="dark">
+
+<a href="https://t.me/Mq12qm" target="_blank" rel="noopener noreferrer" class="dynamic-island">
+  <svg class="di-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+  <span class="di-text">قناة X-RAY على التليجرام</span>
+</a>
+
+<div class="header glass">
+  <div class="logo">X<b>-RAY</b> <span style="color:var(--muted);font-size:.7rem;letter-spacing:1px;">PLATFORM</span></div>
+  <div class="toggle-row">
+    <span class="toggle-lbl">MODE</span>
+    <div class="ios-sw" onclick="toggleMode()"></div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="screen-home" class="screen active">
+  <div class="sec-label">المحاضرات المتاحة</div>
+  <div id="lectures-list"></div>
+</div>
+
+<!-- QUIZ -->
+<div id="screen-quiz" class="screen">
+  <button class="back-btn" onclick="goHome()">← العودة للمحاضرات</button>
+  <div class="progress-wrap glass">
+    <div class="prog-top">
+      <span class="prog-lec" id="prog-lec-name"></span>
+      <span style="font-size:.72rem;color:var(--muted);" id="prog-count">0/0</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+  </div>
+  <div class="quiz-card glass">
+    <div class="q-num" id="q-num"></div>
+    <div class="q-text" id="q-text"></div>
+    <button class="tr-btn" id="tr-btn" onclick="translateMain()">🌐 ترجمة السؤال للعربية</button>
+    <div class="tr-box" id="tr-box"></div>
+    <div id="opts-wrap"></div>
+    <button id="next-btn" class="next-btn" onclick="nextQuestion()">السؤال التالي ←</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="screen-result" class="screen">
+  <button class="back-btn" onclick="goHome()">← العودة للمحاضرات</button>
+  <div class="result-card glass">
+    <div class="result-emoji" id="res-emoji">🎉</div>
+    <div class="result-score" id="res-score">0/0</div>
+    <div class="result-lbl" id="res-lbl"></div>
+    <div class="wrong-badge" id="wrong-badge" style="display:none;"></div>
+    <div class="result-btns">
+      <button class="btn-blue" id="btn-restart">إعادة المحاضرة كاملة 🔄</button>
+      <button class="btn-red"  id="btn-wrong"  style="display:none;" onclick="retryWrong()">إعادة الأسئلة الخاطئة فقط ❌</button>
+      <button class="btn-blue" id="btn-review" style="display:none;" onclick="showScreen('screen-review')">مراجعة الأسئلة الخاطئة 📋</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW WRONG -->
+<div id="screen-review" class="screen">
+  <button class="back-btn" onclick="showScreen('screen-result')">← العودة للنتيجة</button>
+  <div class="review-lbl">الأسئلة الخاطئة — مراجعة تفصيلية</div>
+  <div id="review-list"></div>
+  <div class="action-row">
+    <button class="btn-red"  onclick="retryWrong()">إعادة اختبار الخاطئة مجدداً ❌</button>
+    <button class="btn-blue" onclick="goHome()">العودة للمحاضرات</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+const DATA = [
+  {lecture:1,name:"Lecture 1 - X-Ray Machine Basics",questions:[
+    {q:"Most x-ray machines are designed to operate on which power source voltage?",opts:["110 V","220 V","440 V","380 V"],ans:1},
+    {q:"Some x-ray machines can operate on which lower voltage?",opts:["220 V","380 V","110 V","60 V"],ans:2},
+    {q:"What is the high-end power source voltage that some x-ray machines can operate on?",opts:["380 V","330 V","440 V","550 V"],ans:2},
+    {q:"What is the typical starting high-voltage produced by the x-ray transformer?",opts:["10 kV","30 kV","50 kV","100 kV"],ans:1},
+    {q:"What is the maximum high-voltage used in medical x-ray applications?",opts:["100 kV","300 kV","150 kV","200 kV"],ans:2},
+    {q:"Industrial x-ray applications use voltages over:",opts:["150 kV","300 kV","400 kV","450 kV"],ans:3},
+    {q:"Typical x-ray exposure durations are extremely short, approximately:",opts:["500 ms","1000 ms","100 ms","50 ms"],ans:2},
+    {q:"The tube current used during x-ray exposure is typically:",opts:["50–100 mA","200–1000 mA","1–10 mA","100–150 mA"],ans:1},
+    {q:"The rotating anode is driven by a synchronous motor operating at:",opts:["30 rev/sec","45 rev/sec","60 rev/sec","90 rev/sec"],ans:2}
+  ]},
+  {lecture:2,name:"Lecture 2 - Generators & Rectification",questions:[
+    {q:"Single-phase full-wave rectified generators produce how many pulsations per second?",opts:["60","100","120","240"],ans:2},
+    {q:"Single-phase full-wave rectified generators have what percentage of voltage ripple?",opts:["13%","3%","50%","100%"],ans:3},
+    {q:"Three-phase 6-pulse generators reduce voltage ripple to:",opts:["1%","3%","13%","25%"],ans:2},
+    {q:"Three-phase 12-pulse generators reduce voltage ripple to:",opts:["13%","5%","3%","1%"],ans:2},
+    {q:"High-frequency generators have less than what percentage of ripple?",opts:["3%","5%","1%","10%"],ans:2},
+    {q:"High-frequency generators increase the standard frequency from 60 Hz to:",opts:["120 Hz","1000 Hz","500 KHz","60 KHz"],ans:2},
+    {q:"The high-frequency inverter decreases input voltage to a low voltage of:",opts:["5-8 V","10-12 V","20-30 V","50-60 V"],ans:1},
+    {q:"After stepping down voltage, the inverter increases amperage to:",opts:["10-20 A","1-2 A","3-5 A","50-100 A"],ans:2},
+    {q:"The final kilovoltage required for X-ray production ranges from:",opts:["10-30 kV","40-150 kV","200-300 kV","5-20 kV"],ans:1},
+    {q:"Half-wave rectification is accomplished with how many diodes?",opts:["1","2","4","6"],ans:1},
+    {q:"A full-wave rectified x-ray machine contains at least how many diodes?",opts:["2","3","4","6"],ans:2}
+  ]},
+  {lecture:3,name:"Lecture 3 - X-Ray Tube Components",questions:[
+    {q:"The filament coil in an x-ray tube is usually about what diameter?",opts:["0.5 mm","1 mm","2 mm","5 mm"],ans:2},
+    {q:"The length of the filament coil in an x-ray tube is typically:",opts:["0.5 to 1 cm","1 to 2 cm","3 to 5 cm","5 to 10 cm"],ans:1},
+    {q:"The filament emits electrons sufficiently when current reaches approximately:",opts:["1 A","2 A","4 A","10 A"],ans:2},
+    {q:"The melting point of tungsten is:",opts:["1500 °C","2500 °C","3410 °C","4000 °C"],ans:2},
+    {q:"Adding what percentage of thorium to tungsten improves filament efficiency?",opts:["5% to 10%","1% to 2%","10% to 20%","0.1% to 0.5%"],ans:1},
+    {q:"Standard technique rotor speed is approximately:",opts:["1000 rpm","3200 rpm","5000 rpm","10000 rpm"],ans:1},
+    {q:"High-speed rotors can exceed what speed?",opts:["3200 rpm","4000 rpm","5000 rpm","8000 rpm"],ans:2},
+    {q:"Tungsten's atomic number is:",opts:["42","56","74","82"],ans:2},
+    {q:"Large focal spots have nominal sizes of:",opts:["0.1 to 0.3 mm","0.3 to 0.6 mm","1.0 to 1.2 mm","2.0 to 3.0 mm"],ans:2},
+    {q:"Small focal spots have nominal sizes of:",opts:["0.1 to 0.2 mm","0.3 to 0.6 mm","1.0 to 1.2 mm","2.0 to 3.0 mm"],ans:1},
+    {q:"The anode angle decreases from 24 degrees to what most common target angle?",opts:["5 degrees","8 degrees","12 degrees","20 degrees"],ans:2},
+    {q:"Any anode angle less than what value results in a smaller effective focal spot?",opts:["30 degrees","45 degrees","60 degrees","90 degrees"],ans:1},
+    {q:"The tube window area is approximately:",opts:["1 cm²","3 cm²","5 cm²","10 cm²"],ans:2}
+  ]},
+  {lecture:4,name:"Lecture 4 - Tube QC & Materials",questions:[
+    {q:"Radiation leakage from the x-ray tube housing should not exceed:",opts:["10 mR/hr","50 mR/hr","100 mR/hr","500 mR/hr"],ans:2},
+    {q:"Thorium is added to the tungsten filament in what percentage?",opts:["0.5-1%","1-2%","5-10%","10-20%"],ans:1},
+    {q:"What percentage of Rhenium is added to the tungsten target?",opts:["5%","10%","15%","20%"],ans:1},
+    {q:"Rhenium is mixed with what percentage of tungsten to form the target?",opts:["10%","50%","75%","90%"],ans:3},
+    {q:"Warm-up procedure is performed if the system has not been energized for at least:",opts:["30 min","1 hr","2 hrs","4 hrs"],ans:2}
+  ]},
+  {lecture:5,name:"Lecture 5 - Radiographic Film",questions:[
+    {q:"The thickness of a sheet of radiographic film ranges from:",opts:["50 to 100 µm","150 to 300 µm","500 to 700 µm","1000 to 1500 µm"],ans:1},
+    {q:"What percentage of silver halide in a typical emulsion is silver bromide?",opts:["50%","75%","85%","95%"],ans:3},
+    {q:"The emulsion layer thickness is typically:",opts:["1 to 5 µm","15 to 25 µm","50 to 75 µm","100 to 150 µm"],ans:1},
+    {q:"Phosphor layers in intensifying screens vary in thickness from:",opts:["50 to 100 µm","150 to 300 µm","500 to 800 µm","1000 to 1500 µm"],ans:1},
+    {q:"The base layer of an intensifying screen is:",opts:["100 µm","500 µm","1000 µm","2000 µm"],ans:2},
+    {q:"The reflective layer thickness in a screen is:",opts:["5 µm","10 µm","25 µm","50 µm"],ans:2},
+    {q:"The base of radiographic film is approximately:",opts:["0.1 mm","0.5 mm","1 mm","5 mm"],ans:2},
+    {q:"Developer temperature in automatic processing is maintained at:",opts:["25°C","30°C","35°C","40°C"],ans:2},
+    {q:"Wash water temperature is maintained how much lower than developer?",opts:["1.0°C","2.8°C","5.0°C","10.0°C"],ans:1}
+  ]},
+  {lecture:6,name:"Lecture 6 - Filtration & Grids",questions:[
+    {q:"X-ray machines at 70 kVp or higher must have total filtration of:",opts:["0.5 mm Al","1.5 mm Al","2.5 mm Al","3.5 mm Al"],ans:2},
+    {q:"X-ray machines below 70 kVp require total filtration of:",opts:["0.5 mm Al","1.5 mm Al","2.5 mm Al","3.0 mm Al"],ans:1},
+    {q:"The beryllium window provides approximately what inherent filtration?",opts:["0.05 mm Al","0.1 mm Al","0.5 mm Al","1.0 mm Al"],ans:2},
+    {q:"If attenuation coefficient is 0.4/cm, what is the HVL?",opts:["0.4 cm","1.0 cm","1.73 cm","2.5 cm"],ans:2},
+    {q:"Medical diagnostic x-ray machines typically have HVLs ranging from:",opts:["0.5 to 1.5 mm Al","1.0 to 2.0 mm Al","2.3 to 5 mm Al","5 to 10 mm Al"],ans:2},
+    {q:"At 70 kV, what is the minimum required HVL?",opts:["1.5 mm Al","2.0 mm Al","2.5 mm Al","3.0 mm Al"],ans:2},
+    {q:"At 50 kVp, what percentage of interactions are photoelectric?",opts:["21%","46%","79%","99%"],ans:2},
+    {q:"At 80 kVp, what percentage of interactions are Compton?",opts:["21%","46%","52%","79%"],ans:2},
+    {q:"A high-quality grid can attenuate what percentage of scatter radiation?",opts:["50-60%","70-80%","80-90%","95-99%"],ans:2},
+    {q:"Grid ratios commonly range from:",opts:["2:1 to 8:1","5:1 to 16:1","10:1 to 20:1","1:1 to 5:1"],ans:1},
+    {q:"The most commonly used grid ratios are:",opts:["5:1 to 6:1","8:1 to 10:1","12:1 to 14:1","16:1 to 20:1"],ans:1},
+    {q:"Lead strips in a grid are approximately how thick?",opts:["5 µm","10 µm","30 µm","100 µm"],ans:2},
+    {q:"The interspace material in a grid is approximately how thick?",opts:["30 µm","100 µm","300 µm","500 µm"],ans:2},
+    {q:"The frequency of grids ranges from:",opts:["5-15 lines/cm","25-45 lines/cm","50-100 lines/cm","100-200 lines/cm"],ans:1}
+  ]},
+  {lecture:7,name:"Lecture 7 - Grid Types & Movement",questions:[
+    {q:"A 6:1 crossed grid can clean up more scatter than which linear grid?",opts:["6:1 linear","8:1 linear","10:1 linear","12:1 linear"],ans:3},
+    {q:"Total grid movement in a Bucky is usually about:",opts:["0.5 to 1 cm","2 to 3 cm","5 to 7 cm","10 to 15 cm"],ans:1},
+    {q:"A grid ratio of 8:1 restores contrast to approximately:",opts:["76%","85%","90%","100%"],ans:2},
+    {q:"A high-ratio grid of 16:1 restores contrast to only about:",opts:["60%","70%","76%","90%"],ans:2}
+  ]},
+  {lecture:8,name:"Lecture 8 - Computed Radiography (CR)",questions:[
+    {q:"The photostimulable storage phosphor (PSP) layer is typically how thick?",opts:["0.01-0.05 mm","0.1-0.3 mm","1-2 mm","5-10 mm"],ans:1},
+    {q:"A CR imaging plate can be read in approximately:",opts:["5 seconds","10 seconds","30 seconds","2 minutes"],ans:2},
+    {q:"CR image previews can be available in less than:",opts:["5 seconds","10 seconds","30 seconds","60 seconds"],ans:1},
+    {q:"Imaging plates can theoretically be re-used:",opts:["10 times","100 times","1000 times","Thousands of times"],ans:3}
+  ]},
+  {lecture:9,name:"Lecture 9 - Digital Radiography (DR)",questions:[
+    {q:"DR systems offer a full resolution image displayed in about:",opts:["2 seconds","8 seconds","30 seconds","2 minutes"],ans:1},
+    {q:"Some imaging centers report DR is how many times faster than CR?",opts:["1-2 times","2-4 times","5-10 times","10-20 times"],ans:1},
+    {q:"Maximum flat panel DR array size available is:",opts:["24 cm x 24 cm","35 cm x 43 cm","43 cm x 43 cm","60 cm x 60 cm"],ans:2},
+    {q:"Flat panel DR detectors can have more than how many pixels?",opts:["1 million","5 million","9 million","20 million"],ans:2},
+    {q:"Pixel size in flat panel DR detectors is approximately:",opts:["0.01-0.05 mm","0.14-2 mm","5-10 mm","10-20 mm"],ans:1},
+    {q:"The photoconductor in a direct DR system requires a voltage of approximately:",opts:["100 V","500 V","1000 V","5000 V"],ans:3},
+    {q:"CR readout time ranges from:",opts:["1-5 seconds","10-20 seconds","45 sec to 2 min","5-10 minutes"],ans:2},
+    {q:"Photoconductors prefer materials with a small band gap of approximately:",opts:["0.5 eV","1.52 eV","5.0 eV","10.0 eV"],ans:1}
+  ]},
+  {lecture:10,name:"Lecture 10/11 - Image Quality & Contrast",questions:[
+    {q:"If 500 photons emerge from area A and 100 from area B, what is the ratio?",opts:["2:1","3:1","5:1","10:1"],ans:2},
+    {q:"The subject contrast as difference in log values (500 vs 100) is:",opts:["0.3","0.5","0.7","1.0"],ans:2},
+    {q:"Recommended bit depth for digital x-ray detectors is:",opts:["4-8 bits","10-14 bits","16-20 bits","24-32 bits"],ans:1},
+    {q:"A 10-bit detector provides how many digital values?",opts:["512","1024","2048","4096"],ans:1},
+    {q:"A 14-bit detector provides how many digital values?",opts:["8192","16384","32768","65536"],ans:1}
+  ]},
+  {lecture:12,name:"Lecture 12/13 - Mammography",questions:[
+    {q:"Mammography uses a low operating voltage below:",opts:["20-25 kVp","35-40 kVp","50-60 kVp","70-80 kVp"],ans:1},
+    {q:"Tube current for the large focal spot in mammography is limited to:",opts:["25-50 mA","50-75 mA","100-200 mA","200-400 mA"],ans:2},
+    {q:"Tube current for the small focal spot in mammography is:",opts:["10-15 mA","25-50 mA","75-100 mA","100-200 mA"],ans:1},
+    {q:"In mammography, the tube is tilted by approximately:",opts:["10 degrees","15 degrees","20 degrees","25 degrees"],ans:3},
+    {q:"Most mammographic tubes have inherent filtration of approximately:",opts:["0.05 mm Al","0.1 mm Al","0.5 mm Al","1.0 mm Al"],ans:1},
+    {q:"What percentage of breast cancers detected physically are NOT visible on mammography?",opts:["5-10%","10-20%","25-35%","40-50%"],ans:1},
+    {q:"Mammography has a low positive predictive value of:",opts:["15%","25%","35%","50%"],ans:2},
+    {q:"The radioisotope used in nuclear medicine breast imaging is technetium:",opts:["97","98","99","101"],ans:2},
+    {q:"Nuclear medicine breast imaging is less accurate for abnormalities smaller than:",opts:["0.5 cm","1 cm","2 cm","5 cm"],ans:1}
+  ]},
+  {lecture:14,name:"Lecture 14 - Fluoroscopy",questions:[
+    {q:"The potential difference across an image intensifier tube is approximately:",opts:["5,000 V","10,000 V","25,000 V","50,000 V"],ans:2},
+    {q:"X-ray photons in the image intensifier are converted to how many times more light photons?",opts:["5-10 times","20-30 times","50-75 times","100-200 times"],ans:2},
+    {q:"The fluoroscopic image pixel matrix is at least:",opts:["256 x 256","512 x 512","1024 x 1024","2048 x 2048"],ans:2}
+  ]},
+  {lecture:15,name:"Lecture 15 - Bone Densitometry (DXA)",questions:[
+    {q:"The radiation dose received by the patient during DXA scanning is approximately:",opts:["0.001 mSv","0.014 mSv","0.1 mSv","1.0 mSv"],ans:1},
+    {q:"DXA patient dose is less than which standard x-ray procedure?",opts:["Chest X-ray (0.02 mSv)","Abdominal X-ray","Skull X-ray","Pelvis X-ray"],ans:0},
+    {q:"DXA scanning voltage is typically:",opts:["40-50 kVp","55-60 kVp","70-80 kVp","90-100 kVp"],ans:2},
+    {q:"DXA tube current is typically:",opts:["1-3 mA","8-15 mA","50-75 mA","100-200 mA"],ans:1},
+    {q:"Duration of a standard DXA scan is approximately:",opts:["5-10 seconds","15-20 seconds","1-2 minutes","5-10 minutes"],ans:1},
+    {q:"The DXA technique involves a camera rotation of approximately:",opts:["10-second rotation","20-second rotation","60-second rotation","5-minute rotation"],ans:1}
+  ]}
+];
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let lecIdx    = 0;
+let qIdx      = 0;
+let score     = 0;
+let answered  = false;
+let wrongList = [];      // wrong question objects
+let retryMode = false;
+let retryQ    = [];      // copy for retry session
+let trCache   = {};      // {text: arabicTranslation}
+
+// ══════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════
+function buildHome(){
+  const list = document.getElementById('lectures-list');
+  list.innerHTML='';
+  DATA.forEach((lec,i)=>{
+    const d=document.createElement('div');
+    d.className='lec-card glass';
+    d.style.animationDelay=(i*.05)+'s';
+    d.innerHTML=`<div class="lec-num">L${lec.lecture}</div><div class="lec-body"><div class="lec-name">${lec.name}</div><div class="lec-count">${lec.questions.length} أسئلة</div></div><div class="lec-arrow">›</div>`;
+    d.onclick=()=>startLecture(i);
+    list.appendChild(d);
+  });
+}
+
+// ══════════════════════════════════════════
+// START / RETRY
+// ══════════════════════════════════════════
+function startLecture(i){
+  lecIdx=i; qIdx=0; score=0; answered=false; wrongList=[]; retryMode=false;
+  showScreen('screen-quiz');
+  render();
+}
+
+function retryWrong(){
+  if(!wrongList.length) return;
+  retryQ=[...wrongList];
+  qIdx=0; score=0; answered=false; wrongList=[]; retryMode=true;
+  showScreen('screen-quiz');
+  render();
+}
+
+// ══════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════
+function render(){
+  const pool  = retryMode ? retryQ : DATA[lecIdx].questions;
+  const q     = pool[qIdx];
+  const total = pool.length;
+  const lecName = retryMode ? ('❌ خاطئة — '+DATA[lecIdx].name) : DATA[lecIdx].name;
+
+  document.getElementById('prog-lec-name').textContent = lecName;
+  document.getElementById('prog-count').textContent    = `${qIdx+1}/${total}`;
+  document.getElementById('prog-fill').style.width     = ((qIdx+1)/total*100)+'%';
+  document.getElementById('q-num').textContent         = `${retryMode?'RETRY':'QUESTION'} ${qIdx+1} OF ${total}`;
+  document.getElementById('q-text').textContent        = q.q;
+
+  // reset translate
+  const btn=document.getElementById('tr-btn');
+  const box=document.getElementById('tr-box');
+  btn.textContent='🌐 ترجمة السؤال للعربية';
+  btn.disabled=false;
+  box.style.display='none';
+  box.textContent='';
+
+  // options
+  const wrap=document.getElementById('opts-wrap');
+  wrap.innerHTML='';
+  ['A','B','C','D'].forEach((lbl,i)=>{
+    if(i>=q.opts.length) return;
+    const el=document.createElement('div');
+    el.className='opt glass';
+    el.innerHTML=`<div class="opt-badge">${lbl}</div><span class="opt-text">${q.opts[i]}</span>`;
+    el.onclick=()=>pick(i,q,el);
+    wrap.appendChild(el);
+  });
+  document.getElementById('next-btn').style.display='none';
+  answered=false;
+}
+
+// ══════════════════════════════════════════
+// PICK ANSWER
+// ══════════════════════════════════════════
+function pick(chosen,q,el){
+  if(answered) return;
+  answered=true;
+  const opts=document.querySelectorAll('#opts-wrap .opt');
+  opts.forEach(o=>o.style.pointerEvents='none');
+  if(chosen===q.ans){
+    el.classList.add('correct');
+    el.querySelector('.opt-badge').textContent='✓';
+    score++;
+  } else {
+    el.classList.add('wrong');
+    el.querySelector('.opt-badge').textContent='✗';
+    opts[q.ans].classList.add('correct');
+    opts[q.ans].querySelector('.opt-badge').textContent='✓';
+    if(!wrongList.find(w=>w.q===q.q)) wrongList.push(q);
+  }
+  const pool=retryMode?retryQ:DATA[lecIdx].questions;
+  const nb=document.getElementById('next-btn');
+  nb.textContent=qIdx+1<pool.length?'السؤال التالي ←':'عرض النتيجة 🎯';
+  nb.style.display='block';
+}
+
+// ══════════════════════════════════════════
+// NEXT
+// ══════════════════════════════════════════
+function nextQuestion(){
+  qIdx++;
+  const pool=retryMode?retryQ:DATA[lecIdx].questions;
+  if(qIdx<pool.length){ render(); } else { showResult(); }
+}
+
+// ══════════════════════════════════════════
+// RESULT
+// ══════════════════════════════════════════
+function showResult(){
+  const pool=retryMode?retryQ:DATA[lecIdx].questions;
+  const total=pool.length;
+  const pct=Math.round(score/total*100);
+  const emoji=pct>=80?'🏆':pct>=60?'👍':pct>=40?'📚':'💪';
+  const lbl=pct>=80?'ممتاز!':pct>=60?'جيد جداً':pct>=40?'تحتاج مراجعة':'راجع المحاضرة مجدداً';
+
+  document.getElementById('res-emoji').textContent=emoji;
+  document.getElementById('res-score').textContent=`${score}/${total}`;
+  document.getElementById('res-lbl').textContent=`${pct}% — ${lbl}`;
+  document.getElementById('btn-restart').onclick=()=>startLecture(lecIdx);
+
+  const badge=document.getElementById('wrong-badge');
+  const btnW=document.getElementById('btn-wrong');
+  const btnR=document.getElementById('btn-review');
+
+  if(wrongList.length>0){
+    badge.textContent=`❌ أخطأت في ${wrongList.length} سؤال`;
+    badge.style.display='inline-block';
+    btnW.style.display='block';
+    btnW.textContent=`إعادة الأسئلة الخاطئة (${wrongList.length}) ❌`;
+    btnR.style.display='block';
+    buildReview();
+  } else {
+    badge.style.display='none';
+    btnW.style.display='none';
+    btnR.style.display='none';
+  }
+  showScreen('screen-result');
+}
+
+// ══════════════════════════════════════════
+// BUILD REVIEW LIST
+// ══════════════════════════════════════════
+function buildReview(){
+  const list=document.getElementById('review-list');
+  list.innerHTML='';
+  const LBL=['A','B','C','D'];
+
+  wrongList.forEach((q,idx)=>{
+    const item=document.createElement('div');
+    item.className='review-item glass';
+    item.style.animationDelay=(idx*.07)+'s';
+
+    const optsH=q.opts.map((opt,i)=>{
+      const cls=i===q.ans?'ok':'';
+      const badge=i===q.ans?'✓':LBL[i];
+      return `<div class="rev-opt ${cls}"><div class="rev-badge">${badge}</div><span>${opt}</span></div>`;
+    }).join('');
+
+    // encode the question text safely as a data attribute
+    item.innerHTML=`
+      <div class="review-err-tag">❌ سؤال خاطئ ${idx+1}</div>
+      <div class="review-q">${q.q}</div>
+      <button class="review-tr-btn" data-text="${encodeURIComponent(q.q)}" onclick="translateReview(this)">🌐 ترجمة السؤال</button>
+      <div class="review-tr-box"></div>
+      <div class="review-opts">${optsH}</div>`;
+    list.appendChild(item);
+  });
+}
+
+// ══════════════════════════════════════════
+// TRANSLATE — MAIN QUIZ
+// ══════════════════════════════════════════
+async function translateMain(){
+  const btn=document.getElementById('tr-btn');
+  const box=document.getElementById('tr-box');
+  const text=document.getElementById('q-text').textContent;
+
+  if(box.style.display==='block'){
+    box.style.display='none';
+    btn.textContent='🌐 ترجمة السؤال للعربية';
+    return;
+  }
+  if(trCache[text]){
+    box.textContent=trCache[text];
+    box.style.display='block';
+    btn.textContent='🙈 إخفاء الترجمة';
+    return;
+  }
+  btn.textContent='⏳ جاري الترجمة...';
+  btn.disabled=true;
+  const result=await gtrans(text);
+  btn.disabled=false;
+  if(result){
+    trCache[text]=result;
+    box.textContent=result;
+    box.style.display='block';
+    btn.textContent='🙈 إخفاء الترجمة';
+  } else {
+    btn.textContent='❌ فشلت — اضغط مجدداً';
+  }
+}
+
+// ══════════════════════════════════════════
+// TRANSLATE — REVIEW SCREEN
+// ══════════════════════════════════════════
+async function translateReview(btn){
+  const box=btn.nextElementSibling;
+  const text=decodeURIComponent(btn.dataset.text);
+
+  if(box.style.display==='block'){
+    box.style.display='none';
+    btn.innerHTML='🌐 ترجمة السؤال';
+    return;
+  }
+  if(trCache[text]){
+    box.textContent=trCache[text];
+    box.style.display='block';
+    btn.innerHTML='🙈 إخفاء الترجمة';
+    return;
+  }
+  btn.innerHTML='⏳ جاري الترجمة...';
+  btn.disabled=true;
+  const result=await gtrans(text);
+  btn.disabled=false;
+  if(result){
+    trCache[text]=result;
+    box.textContent=result;
+    box.style.display='block';
+    btn.innerHTML='🙈 إخفاء الترجمة';
+  } else {
+    btn.innerHTML='❌ فشلت — اضغط مجدداً';
+  }
+}
+
+// ══════════════════════════════════════════
+// GOOGLE TRANSLATE (free endpoint — no key)
+// ══════════════════════════════════════════
+async function gtrans(text){
+  try{
+    const url=`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ar&dt=t&q=${encodeURIComponent(text)}`;
+    const r=await fetch(url);
+    const d=await r.json();
+    return d[0].map(s=>s[0]).join('');
+  }catch(e){return null;}
+}
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function goHome(){ retryMode=false; showScreen('screen-home'); }
+function toggleMode(){
+  const b=document.body;
+  b.setAttribute('data-theme',b.getAttribute('data-theme')==='dark'?'light':'dark');
+}
+
+// INIT
+buildHome();
+</script>
+</body>
